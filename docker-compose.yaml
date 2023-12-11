@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  postgres:
+    hostname: "postgres"
+    image: postgres
+    environment:
+      - POSTGRES_USER=alichz
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=sika
+    expose:
+      - "5432"
+    networks:
+      test:
+  web:
+    build:
+      dockerfile: ./dockerfile/WEB.DOCKERFILE
+      context: .
+    environment:
+      - POSTGRES_DSN=host=postgres user=alichz password=1234 dbname=postgres port=5432
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      test:
+
+  migrator:
+    build:
+      dockerfile: ./dockerfile/MIGRATOR.DOCKERFILE
+      context: .
+    environment:
+      - POSTGRES_DSN=host=postgres user=alichz password=1234 dbname=postgres port=5432
+    restart: "no"
+    depends_on:
+      - postgres
+    networks:
+      test:
+
+  generator:
+    build:
+      dockerfile: ./dockerfile/GENERATOR.DOCKERFILE
+      context: .
+    environment:
+      - POSTGRES_DSN=host=postgres user=alichz password=1234 dbname=postgres port=5432
+    restart: "no"
+    depends_on:
+      - migrator
+      - postgres
+    networks:
+      test:
+
+networks:
+  test:
