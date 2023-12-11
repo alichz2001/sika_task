@@ -41,4 +41,3 @@ Follow these steps to run the Sika Task #1 project:
     ```bash
     curl http://localhsot:8080/users/1
     ```
-    ```
