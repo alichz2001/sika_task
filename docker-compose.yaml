@@ -10,8 +10,14 @@ services:
       - POSTGRES_DB=sika
     expose:
       - "5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       test:
+
   web:
     build:
       dockerfile: ./dockerfile/WEB.DOCKERFILE
@@ -22,7 +28,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       test:
 
@@ -34,7 +41,8 @@ services:
       - POSTGRES_DSN=host=postgres user=alichz password=1234 dbname=postgres port=5432
     restart: "no"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       test:
 
@@ -46,8 +54,11 @@ services:
       - POSTGRES_DSN=host=postgres user=alichz password=1234 dbname=postgres port=5432
     restart: "no"
     depends_on:
-      - migrator
-      - postgres
+      migrator:
+        - condition: service_completed_successfully
+      postgres:
+        - condition: service_healthy
+
     networks:
       test:
 
